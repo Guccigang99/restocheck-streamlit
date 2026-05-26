@@ -1,4 +1,3 @@
-
 import sqlite3
 from pathlib import Path
 from datetime import date
@@ -11,6 +10,7 @@ def get_connection():
 def init_db():
     conn = get_connection()
     cur = conn.cursor()
+
     cur.execute("""
         CREATE TABLE IF NOT EXISTS restaurants (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -20,6 +20,7 @@ def init_db():
             created_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
     """)
+
     cur.execute("""
         CREATE TABLE IF NOT EXISTS crew (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -37,20 +38,27 @@ def init_db():
             FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
         )
     """)
+
     conn.commit()
     conn.close()
 
 def add_restaurant(name, address="", active=True):
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("INSERT INTO restaurants (name, address, active) VALUES (?, ?, ?)", (name.strip(), address.strip(), 1 if active else 0))
+    cur.execute(
+        "INSERT INTO restaurants (name, address, active) VALUES (?, ?, ?)",
+        (name.strip(), address.strip(), 1 if active else 0)
+    )
     conn.commit()
     conn.close()
 
 def update_restaurant(restaurant_id, name, address="", active=True):
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("UPDATE restaurants SET name=?, address=?, active=? WHERE id=?", (name.strip(), address.strip(), 1 if active else 0, restaurant_id))
+    cur.execute(
+        "UPDATE restaurants SET name=?, address=?, active=? WHERE id=?",
+        (name.strip(), address.strip(), 1 if active else 0, restaurant_id)
+    )
     conn.commit()
     conn.close()
 
@@ -78,24 +86,38 @@ def get_restaurant(restaurant_id):
     conn.close()
     return row
 
-def add_crew(restaurant_id, first_name, last_name, birthdate, status, contract_hours, function, department, notes, active=True):
+def add_crew(restaurant_id, first_name, last_name, birthdate, status, contract_hours,
+             function, department, notes, active=True):
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("""
-        INSERT INTO crew (restaurant_id, first_name, last_name, birthdate, status, contract_hours, function, department, notes, active)
+        INSERT INTO crew (
+            restaurant_id, first_name, last_name, birthdate, status,
+            contract_hours, function, department, notes, active
+        )
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (restaurant_id, first_name.strip(), last_name.strip(), birthdate, status, contract_hours, function.strip(), department.strip(), notes.strip(), 1 if active else 0))
+    """, (
+        restaurant_id, first_name.strip(), last_name.strip(), birthdate, status,
+        contract_hours, function.strip(), department.strip(), notes.strip(),
+        1 if active else 0
+    ))
     conn.commit()
     conn.close()
 
-def update_crew(crew_id, first_name, last_name, birthdate, status, contract_hours, function, department, notes, active=True):
+def update_crew(crew_id, first_name, last_name, birthdate, status, contract_hours,
+                function, department, notes, active=True):
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("""
         UPDATE crew
-        SET first_name=?, last_name=?, birthdate=?, status=?, contract_hours=?, function=?, department=?, notes=?, active=?
+        SET first_name=?, last_name=?, birthdate=?, status=?, contract_hours=?,
+            function=?, department=?, notes=?, active=?
         WHERE id=?
-    """, (first_name.strip(), last_name.strip(), birthdate, status, contract_hours, function.strip(), department.strip(), notes.strip(), 1 if active else 0, crew_id))
+    """, (
+        first_name.strip(), last_name.strip(), birthdate, status, contract_hours,
+        function.strip(), department.strip(), notes.strip(), 1 if active else 0,
+        crew_id
+    ))
     conn.commit()
     conn.close()
 
@@ -103,7 +125,8 @@ def get_crew(restaurant_id):
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("""
-        SELECT id, first_name, last_name, birthdate, status, contract_hours, function, department, notes, active
+        SELECT id, first_name, last_name, birthdate, status, contract_hours,
+               function, department, notes, active
         FROM crew
         WHERE restaurant_id=?
         ORDER BY last_name, first_name
